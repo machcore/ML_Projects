@@ -1,5 +1,6 @@
 # Ignore all __pycache__ directories at any subfolder level
 __pycache__/
+**/__pycache__/
 *.py[cod]
 
 # Ignore virtual environments
