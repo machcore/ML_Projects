@@ -22,6 +22,9 @@ cgpa_Y = data['CGPA'].to_numpy()
 w, b, loss_history = train_linear_reg_model(epochs, nbr_simples, studyHours_X, cgpa_Y, alpha, w, b)
 
 
+test_data = pd.read_csv('Simple_Linear_Reg/datasets/test_dataset.csv')
+test_data["pred_cgpa"] = w * test_data["Study_Hours"] + b
+test_data.to_csv("Simple_Linear_Reg/datasets/test_with_pred.csv", index=False)
 
 # Plot Loss vs Epochs
 
