@@ -32,4 +32,3 @@ results["Gaussian"] = mn.predict_gaussian(X_new)
 results["KDE"] = mn.predict_kde(X_new)
 results["GMM"] = mn.predict_gmm(X_new)
 
-print(results.to_string(index=False))

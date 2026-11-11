@@ -489,3 +489,96 @@ plt.tight_layout()
 plt.show()
 
 """
+
+from scipy.stats import multivariate_normal
+
+def gaussian_pdf(X, c):
+    mu, cov = gaussian_models[c]
+
+    return multivariate_normal.pdf(
+        X,
+        mean=mu,
+        cov=cov
+    )
+
+
+def kde_pdf(X, c):
+    return np.exp(
+        kde_models[c].score_samples(X)
+    )
+
+def gmm_pdf(X, c):
+    return np.exp(
+        gmm_models[c].score_samples(X)
+    )
+
+
+def histogram_pdf(X, c):
+    density = np.ones(len(X))
+
+    for j in num_indices:
+        bin_edges = edges[j]
+
+        idx = np.searchsorted(
+            bin_edges, X[:, j], side="right"
+        ) - 1
+
+        idx = np.clip(idx, 0, n_bins - 1)
+
+        probs = hist_models[c][j][idx]
+        widths = np.diff(bin_edges)[idx]
+
+        density *= probs / widths
+
+    for j in binary_indices:
+        p = hist_models[c][j]
+
+        density *= np.where(
+            X[:, j] == 1,
+            p,
+            1 - p
+        )
+
+    return density
+
+screen_times = np.linspace(5, 240, 200)
+
+sample = pd.DataFrame({
+    "bedtime_hour": 22.0,
+    "screen_time_before_bed_min": screen_times,
+    "primary_app_category": "Gaming",
+    "screen_brightness_pct": 10,
+    "blue_light_filter_on": True
+})
+
+X_grid = preprocess_new(sample)
+
+pdf_methods = {
+    "Histogram": histogram_pdf,
+    "Gaussian": gaussian_pdf,
+    "KDE": kde_pdf,
+    "GMM": gmm_pdf
+}
+
+fig, axes = plt.subplots(2, 2, figsize=(13, 9))
+
+for ax, (name, pdf_func) in zip(
+    axes.flat, pdf_methods.items()
+):
+    for c in classes:
+        values = pdf_func(X_grid, c)
+
+        ax.plot(
+            screen_times,
+            values,
+            label=c
+        )
+
+    ax.set_title(name)
+    ax.set_xlabel("Screen Time Before Bed (minutes)")
+    ax.set_ylabel("Conditional density")
+    ax.legend()
+    ax.grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()
